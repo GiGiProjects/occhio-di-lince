@@ -1,0 +1,61 @@
+# Compila Occhio.exe dal codice di questo repository e lo pubblica nelle Releases.
+# Parte quando viene creato un tag di versione (es. v1.1.0).
+# Ogni release include l'impronta SHA256 e un'attestazione di provenienza firmata da GitHub,
+# che dimostra che il file e' stato compilato da QUESTO codice, su server GitHub.
+name: Compila e pubblica Occhio.exe
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write       # creare la release
+  id-token: write       # firmare l'attestazione
+  attestations: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Scarica il codice
+        uses: actions/checkout@v4
+
+      - name: Compila con il compilatore C# incluso in Windows
+        shell: pwsh
+        run: |
+          $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          New-Item -ItemType Directory -Force dist | Out-Null
+          & $csc /nologo /target:exe /platform:anycpu /optimize+ `
+            /win32manifest:src\app.manifest /win32icon:assets\occhio.ico `
+            /r:System.Web.Extensions.dll /out:dist\Occhio.exe src\Agent.cs src\AgentConfig.cs
+          if ($LASTEXITCODE) { throw 'Compilazione fallita' }
+          $hash = (Get-FileHash dist\Occhio.exe -Algorithm SHA256).Hash
+          "$hash  Occhio.exe" | Out-File dist\Occhio.exe.sha256 -Encoding ascii
+          "SHA256=$hash" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "SHA256 di Occhio.exe: $hash"
+
+      - name: Attestazione di provenienza (firmata da GitHub)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/Occhio.exe
+
+      - name: Pubblica la release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $notes = @"
+          ## Occhio di Lince $tag
+
+          Strumento di diagnostica PC usato dallo staff per i controlli anti-cheat. **Usalo solo quando uno staffer te lo chiede**, insieme al codice che ti fornisce.
+
+          **Impronta SHA256 di Occhio.exe**
+          ``$env:SHA256``
+
+          Compilato automaticamente da GitHub a partire dal codice di questo repository (commit ${{ github.sha }}).
+          Come verificarlo: vedi la sezione *Verifica del file* nel README.
+          "@
+          gh release create $tag dist/Occhio.exe dist/Occhio.exe.sha256 --title "Occhio di Lince $tag" --notes $notes
