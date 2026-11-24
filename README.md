@@ -57,7 +57,7 @@ Ogni versione è compilata **automaticamente da GitHub** a partire dal codice di
    Il valore deve essere identico a quello della release.
 2. **Attestazione di GitHub.** Ogni file ha un'attestazione firmata da GitHub che lo collega al codice e alla compilazione da cui è nato. Con la [GitHub CLI](https://cli.github.com/):
    ```powershell
-   gh attestation verify .\Occhio.exe --repo luigigirotta-spec/occhio-di-lince
+   gh attestation verify .\Occhio.exe --repo GiGiProjects/occhio-di-lince
    ```
 3. **Scansione antivirus.** Ogni release ha il link alla scansione su [VirusTotal](https://www.virustotal.com). I principali antivirus (Microsoft Defender, Kaspersky, ESET, Bitdefender, Malwarebytes e altri) lo considerano pulito. Qualche motore minore può segnalarlo con nomi generici: succede spesso ai programmi nuovi senza firma digitale che chiedono i permessi di amministratore.
 

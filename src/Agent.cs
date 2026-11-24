@@ -19,12 +19,12 @@ using System.Web.Script.Serialization;
 [assembly: AssemblyProduct("Occhio di Lince")]
 [assembly: AssemblyDescription("Strumento di diagnostica PC per lo staff")]
 [assembly: AssemblyCompany("Occhio di Lince")]
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.1.1.0")]
+[assembly: AssemblyFileVersion("1.1.1.0")]
 
 static class Program
 {
-    const string Version = "1.1.0";
+    const string Version = "1.1.1";
     static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = int.MaxValue };
     static string Server;
 
